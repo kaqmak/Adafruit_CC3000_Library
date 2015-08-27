@@ -30,6 +30,7 @@
 #include "utility/netapp.h"
 #include "ccspi.h"
 #include "Client.h"
+#include <avr/wdt.h> //Per
 
 #if defined(__arm__) && defined(__SAM3X8E__) // Arduino Due
   #define SPI_CLOCK_DIVIDER 6 // used to set the speed for the SPI bus; 6 == 14 Mhz on the Arduino Due

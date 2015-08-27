@@ -33,6 +33,7 @@
 #include "utility/wlan.h"
 #include "utility/debug.h"
 #include "utility/sntp.h"
+#include <avr/wdt.h> //Per
 
 uint8_t g_csPin, g_irqPin, g_vbatPin, g_IRQnum, g_SPIspeed;
 
@@ -239,6 +240,7 @@ Adafruit_CC3000::Adafruit_CC3000(uint8_t csPin, uint8_t irqPin, uint8_t vbatPin,
 /**************************************************************************/
 bool Adafruit_CC3000::begin(uint8_t patchReq, bool useSmartConfigData, const char *_deviceName)
 {
+  wdt_reset();//Per
   if (_initialised) return true;
 
   #if defined(digitalPinToInterrupt)
@@ -267,7 +269,8 @@ bool Adafruit_CC3000::begin(uint8_t patchReq, bool useSmartConfigData, const cha
   #endif
 
   init_spi();
-  
+  wdt_reset();//Per
+  //Serial.println("foerste");
   DEBUGPRINT_F("init\n\r");
   wlan_init(CC3000_UsynchCallback,
             sendWLFWPatch, sendDriverPatch, sendBootLoaderPatch,
@@ -276,9 +279,11 @@ bool Adafruit_CC3000::begin(uint8_t patchReq, bool useSmartConfigData, const cha
             WlanInterruptDisable,
             WriteWlanPin);
   DEBUGPRINT_F("start\n\r");
-
+  wdt_reset();//Per
+  //Serial.println("anden");
   wlan_start(patchReq);
-  
+  wdt_reset();//Per
+  //Serial.println("tredie");
   DEBUGPRINT_F("ioctl\n\r");
   // Check if we should erase previous stored connection details
   // (most likely written with data from the SmartConfig app)
@@ -310,7 +315,8 @@ bool Adafruit_CC3000::begin(uint8_t patchReq, bool useSmartConfigData, const cha
                         "WLAN Set Event Mask FAIL", false);
 
   _initialised = true;
-
+wdt_reset();//Per
+//Serial.println("fjerde");
   // Wait for re-connection if we're using SmartConfig data
   if (useSmartConfigData)
   {
@@ -328,15 +334,17 @@ bool Adafruit_CC3000::begin(uint8_t patchReq, bool useSmartConfigData, const cha
       }
       timeout += 10;
       delay(10);
+      wdt_reset();
     }
-    
-    delay(1000);  
+    wdt_reset();//Per
+    delay(1000);
+    wdt_reset();//Per
     if (cc3000Bitset.test(CC3000BitSet::HasDHCP))
     {
       mdnsAdvertiser(1, (char *) _deviceName, strlen(_deviceName));
     }
   }
-    
+
   return true;
 }
 
@@ -1100,10 +1108,14 @@ bool Adafruit_CC3000::connectToAP(const char *ssid, const char *key, uint8_t sec
     /* MEME: not sure why this is absolutely required but the cc3k freaks
        if you dont. maybe bootup delay? */
     // Setup a 4 second SSID scan
+    wdt_reset();
     scanSSIDs(4000);
+    wdt_reset();
     // Wait for results
     delay(4500);
+    wdt_reset();
     scanSSIDs(0);
+    wdt_reset();
     
     /* Attempt to connect to an access point */
     CHECK_PRINTER {

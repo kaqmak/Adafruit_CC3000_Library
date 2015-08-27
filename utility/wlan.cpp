@@ -59,6 +59,7 @@
 #include "security.h"
 #include "evnt_handler.h"
 #include "debug.h"
+#include <avr/wdt.h> //Per
 
 volatile sSimplLinkInformation tSLInformation;
 
@@ -281,32 +282,32 @@ void wlan_start(UINT16 usPatchesAvailableAtHost)
 
 	// Allocate the memory for the RX/TX data transactions
 	tSLInformation.pucTxCommandBuffer = (UINT8 *)wlan_tx_buffer;
-
+	wdt_reset();//Per
 	// init spi
 	SpiOpen(SpiReceiveHandler);
-
+	wdt_reset();//Per
 	// Check the IRQ line
 	ulSpiIRQState = tSLInformation.ReadWlanInterruptPin();
-
+	wdt_reset();//Per
 	// Chip enable: toggle WLAN EN line
 	tSLInformation.WriteWlanPin( WLAN_ENABLE );
-
+	wdt_reset();//Per
 	if (ulSpiIRQState)
 	{
 		// wait till the IRQ line goes low
 		while(tSLInformation.ReadWlanInterruptPin() != 0)
-		{
+		{wdt_reset();//Per
 		}
 	}
 	else
 	{
 		// wait till the IRQ line goes high and than low
 		while(tSLInformation.ReadWlanInterruptPin() == 0)
-		{
+		{wdt_reset();//Per
 		}
 
 		while(tSLInformation.ReadWlanInterruptPin() != 0)
-		{
+		{wdt_reset();//Per
 		}
 	}
 	// Adafruit CC3k Host Driver Difference
@@ -314,7 +315,7 @@ void wlan_start(UINT16 usPatchesAvailableAtHost)
 	// Noted 12-12-2014 by tdicola
 	DEBUGPRINT_F("SimpleLink start\n\r");
 	SimpleLink_Init_Start(usPatchesAvailableAtHost);
-
+	wdt_reset();//Per
 	// Read Buffer's size and finish
 	DEBUGPRINT_F("Read buffer\n\r");
 	hci_command_send(HCI_CMND_READ_BUFFER_SIZE, tSLInformation.pucTxCommandBuffer, 0);
